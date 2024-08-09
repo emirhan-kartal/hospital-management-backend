@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"example/hello/models"
+	"emir/hospital/models"
 	"os"
 	"time"
 
-	_ "example/hello/docs"
+	_ "emir/hospital/docs"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"

@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"example/hello/models"
+	"emir/hospital/models"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"

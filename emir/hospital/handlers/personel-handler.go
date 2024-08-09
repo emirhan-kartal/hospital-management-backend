@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"example/hello/models"
-	"example/hello/utils"
+	"emir/hospital/models"
+	"emir/hospital/utils"
 	"fmt"
 	"strings"
 

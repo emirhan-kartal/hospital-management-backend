@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	"emir/hospital/models"
 	"encoding/json"
-	"example/hello/models"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"

@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"example/hello/handlers"
-	"example/hello/middleware"
-	"example/hello/routes"
+	"emir/hospital/handlers"
+	"emir/hospital/middleware"
+	"emir/hospital/routes"
 	"log"
 	"os"
 
-	_ "example/hello/docs"
+	_ "emir/hospital/docs"
 
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/swagger"
@@ -35,7 +35,7 @@ func main() {
 	gotoEnvErr := godotenv.Load()
 
 	if gotoEnvErr != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file, put JWT_SECRET")
 	}
 	JWT_SECRET = os.Getenv("JWT_SECRET")
 	app := fiber.New()

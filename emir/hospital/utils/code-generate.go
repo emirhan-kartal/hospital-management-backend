@@ -2,8 +2,8 @@ package utils
 
 import (
 	"context"
+	"emir/hospital/models"
 	"encoding/json"
-	"example/hello/models"
 	"math/rand"
 
 	"github.com/gofiber/fiber/v2"

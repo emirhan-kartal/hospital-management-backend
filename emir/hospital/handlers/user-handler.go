@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"example/hello/models"
-	"example/hello/utils"
+	"emir/hospital/models"
+	"emir/hospital/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"

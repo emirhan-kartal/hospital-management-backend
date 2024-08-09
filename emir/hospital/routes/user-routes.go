@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"example/hello/handlers"
+	"emir/hospital/handlers"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"

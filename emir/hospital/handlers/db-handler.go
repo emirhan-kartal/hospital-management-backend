@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"example/hello/models"
-	"example/hello/utils"
+	"emir/hospital/models"
+	"emir/hospital/utils"
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
