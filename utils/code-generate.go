@@ -4,12 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"example/hello/models"
-	"fmt"
 	"math/rand"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -33,7 +31,6 @@ func RandString(n int) string {
 func IsAdmin(c *fiber.Ctx) bool {
 	claims := c.Locals("user").(*jwt.Token).Claims.(jwt.MapClaims)
 	role := claims["role"].(string)
-	fmt.Println(role)
 	if role != "Admin" {
 		return false
 	}
@@ -70,35 +67,25 @@ func RedisDataContains(key string, value string, ctx context.Context, rdb *redis
 		return false
 	}
 	for _, v := range slice {
-		fmt.Println(v.Name + "  " + value)
 		if v.Name == value {
-			fmt.Println("True " + v.Name + "  " + value)
 			return true
 		}
 	}
 	return false
 }
-func getJobTypeCounts(db *gorm.DB, hospitalID int) (map[string]int, error) {
-	var result []struct {
-		JobType string
-		Count   int
-	}
-
-	err := db.Table("personels").
-		Select("job_type, COUNT(*) as count").
-		Joins("JOIN polyclinics ON personels.polyclinic_id = polyclinics.id").
-		Where("polyclinics.hospital_id = ?", hospitalID).
-		Group("job_type").
-		Scan(&result).Error
-
+func TitleJobTypeRelated(title string, jobType string, rdb *redis.Client) bool {
+	var slice []models.JobType
+	err := json.Unmarshal([]byte(rdb.Get(context.Background(), "job-types").Val()), &slice)
 	if err != nil {
-		return nil, err
+		return false
+	}
+	for _, v := range slice {
+		for _, v_title := range v.Titles {
+			if v_title.Name == title && v.Name == jobType {
+				return true
+			}
+		}
 	}
 
-	jobTypeCounts := make(map[string]int)
-	for _, row := range result {
-		jobTypeCounts[row.JobType] = row.Count
-	}
-
-	return jobTypeCounts, nil
+	return false
 }

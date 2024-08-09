@@ -10,11 +10,14 @@ type RedisPolyclinic struct {
 }
 type Polyclinic struct {
 	gorm.Model
+	PolyclinicBody
 	ID         int `gorm:"primaryKey;unique"`
 	HospitalID int
 	Hospital   Hospital `gorm:"foreignKey:HospitalID;references:ID"`
-	City       string   `gorm:"type:varchar(100)"`
-	District   string   `gorm:"type:varchar(100)"`
-	Name       string   `gorm:"type:varchar(255)"`
 	Personels  []Personel
+}
+type PolyclinicBody struct {
+	Name     string `json:"polyclinic_name"`
+	City     string `json:"city"`
+	District string `json:"district"`
 }

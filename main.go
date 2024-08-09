@@ -5,11 +5,13 @@ import (
 	"example/hello/handlers"
 	"example/hello/middleware"
 	"example/hello/routes"
-	"fmt"
 	"log"
 	"os"
 
+	_ "example/hello/docs"
+
 	jwtware "github.com/gofiber/contrib/jwt"
+	"github.com/gofiber/swagger"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -18,17 +20,26 @@ import (
 var JWT_SECRET string
 var ctx = context.Background()
 
+// @title Auth API
+// @version 1.0
+// @description API for managing authentication
+// @host localhost:3000
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	db := handlers.SqliteHandler()
 	redis := handlers.RedisHandler(ctx)
 
 	gotoEnvErr := godotenv.Load()
+
 	if gotoEnvErr != nil {
 		log.Fatal("Error loading .env file")
 	}
 	JWT_SECRET = os.Getenv("JWT_SECRET")
-	fmt.Println(JWT_SECRET)
 	app := fiber.New()
+	app.Get("/swagger/*", swagger.HandlerDefault) // default
 
 	routes.SetupAuthRoutes(app, db, redis)
 	routes.SetupPwResetRoutes(app, db, redis)

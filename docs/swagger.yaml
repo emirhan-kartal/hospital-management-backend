@@ -1,0 +1,849 @@
+basePath: /
+definitions:
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  handlers.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handlers.LoginData:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      tel_no:
+        type: string
+    type: object
+  handlers.PolyclinicData:
+    properties:
+      city:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      district:
+        type: string
+      hospital:
+        $ref: '#/definitions/models.Hospital'
+      hospitalID:
+        type: integer
+      id:
+        type: integer
+      jobCounts:
+        items:
+          additionalProperties:
+            type: integer
+          type: object
+        type: array
+      personels:
+        items:
+          $ref: '#/definitions/models.Personel'
+        type: array
+      polyclinic_name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  handlers.RegisterData:
+    properties:
+      hospital:
+        $ref: '#/definitions/models.Hospital'
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  handlers.RegisterDataBody:
+    properties:
+      hospital:
+        $ref: '#/definitions/models.HospitalBody'
+      user:
+        $ref: '#/definitions/models.UserBody'
+    type: object
+  handlers.ResetPasswordData:
+    properties:
+      password:
+        type: string
+      repeat_password:
+        type: string
+      validate_code:
+        type: string
+    type: object
+  handlers.ResetPasswordFinalizeCode:
+    properties:
+      code:
+        type: string
+      tel_no:
+        type: string
+    type: object
+  handlers.ResetPasswordInitiateData:
+    properties:
+      tel_no:
+        type: string
+    type: object
+  handlers.UpdatePersonelBody:
+    properties:
+      job_type:
+        type: string
+      name:
+        type: string
+      polyclinic_id:
+        type: integer
+      surname:
+        type: string
+      tc_no:
+        type: string
+      tel_no:
+        type: string
+      title:
+        type: string
+      working_days:
+        type: string
+    type: object
+  models.Hospital:
+    properties:
+      adressDetail:
+        type: string
+      city:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      district:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      polyclinics:
+        items:
+          $ref: '#/definitions/models.Polyclinic'
+        type: array
+      taxID:
+        type: string
+      telNo:
+        type: string
+      updatedAt:
+        type: string
+      user:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
+  models.HospitalBody:
+    properties:
+      adressDetail:
+        type: string
+      city:
+        type: string
+      district:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      taxID:
+        type: string
+      telNo:
+        type: string
+    type: object
+  models.Personel:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      hospital_id:
+        type: integer
+      id:
+        type: integer
+      job_type:
+        type: string
+      name:
+        type: string
+      polyclinic:
+        $ref: '#/definitions/models.Polyclinic'
+      polyclinic_id:
+        type: integer
+      surname:
+        type: string
+      tc_no:
+        type: string
+      tel_no:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+      working_days:
+        type: string
+    type: object
+  models.PersonelBody:
+    properties:
+      job_type:
+        type: string
+      name:
+        type: string
+      surname:
+        type: string
+      tc_no:
+        type: string
+      tel_no:
+        type: string
+      title:
+        type: string
+      working_days:
+        type: string
+    type: object
+  models.Polyclinic:
+    properties:
+      city:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      district:
+        type: string
+      hospital:
+        $ref: '#/definitions/models.Hospital'
+      hospitalID:
+        type: integer
+      id:
+        type: integer
+      personels:
+        items:
+          $ref: '#/definitions/models.Personel'
+        type: array
+      polyclinic_name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.PolyclinicBody:
+    properties:
+      city:
+        type: string
+      district:
+        type: string
+      polyclinic_name:
+        type: string
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      hospital:
+        $ref: '#/definitions/models.Hospital'
+      hospitalID:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      surname:
+        type: string
+      tcNo:
+        type: string
+      telNo:
+        type: string
+      tokenVersion:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  models.UserBody:
+    properties:
+      email:
+        type: string
+      hospitalID:
+        type: integer
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      surname:
+        type: string
+      tcNo:
+        type: string
+      telNo:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: API for managing authentication
+  title: Auth API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login a user and return a JWT token.You can login with email or
+        tel_no
+      parameters:
+      - description: Login Data
+        in: body
+        name: loginData
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Login a user
+      tags:
+      - auth
+  /personel:
+    post:
+      consumes:
+      - application/json
+      description: Add a new personel to the hospital
+      parameters:
+      - description: personel
+        in: body
+        name: personel
+        required: true
+        schema:
+          $ref: '#/definitions/models.PersonelBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Personel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add a new personel
+      tags:
+      - personel
+  /personel/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing personel by ID
+      parameters:
+      - description: Personel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Personel'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a personel
+      tags:
+      - personel
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single personel by ID
+      parameters:
+      - description: Personel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Personel'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get personel by ID
+      tags:
+      - personel
+    put:
+      consumes:
+      - application/json
+      description: Update an existing personel's details.gorm.Model shouldnt be included
+        here.(createdAt,updatedAt,deletedAt)
+      parameters:
+      - description: personel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: personel
+        in: body
+        name: personel
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdatePersonelBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Personel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a personel
+      tags:
+      - personel
+  /polyclinics:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of polyclinics associated with the user's hospital
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.PolyclinicData'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get polyclinics of the hospital
+      tags:
+      - polyclinic
+    post:
+      consumes:
+      - application/json
+      description: Add a new polyclinic to the user's hospital
+      parameters:
+      - description: Polyclinic Data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.PolyclinicBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Polyclinic'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add a polyclinic to the hospital
+      tags:
+      - polyclinic
+  /polyclinics/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing polyclinic by ID
+      parameters:
+      - description: Polyclinic ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Polyclinic'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a polyclinic
+      tags:
+      - polyclinic
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user and hospital,Ignore HospitalID in User
+      parameters:
+      - description: Register Data
+        in: body
+        name: registerData
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterDataBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.RegisterData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Register a new user
+      tags:
+      - auth
+  /reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Change the user's password using the validation token
+      parameters:
+      - description: Password reset data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ResetPasswordData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password changed successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Reset password
+      tags:
+      - password-reset
+  /reset-password/finalize:
+    post:
+      consumes:
+      - application/json
+      description: Validate the reset code and get a token to change the password
+      parameters:
+      - description: Reset code and phone number
+        in: body
+        name: resetPassword
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ResetPasswordFinalizeCode'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset successful. go to /change-password with this
+            token:<token>
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Finalize password reset
+      tags:
+      - password-reset
+  /reset-password/initiate:
+    post:
+      consumes:
+      - application/json
+      description: Send a reset code to the user's phone number
+      parameters:
+      - description: Phone number
+        in: body
+        name: phone
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ResetPasswordInitiateData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Code sent to your phone number. Code(For Development):<code>
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Initiate password reset
+      tags:
+      - password-reset
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all users associated with the user's hospital
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Add a new user to the hospital.HospitalID is taken from the token.It
+        will be ignored in the request body
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new user
+      tags:
+      - user
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user's details
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a user
+      tags:
+      - user
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

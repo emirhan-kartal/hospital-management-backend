@@ -14,6 +14,18 @@ type UserHandler struct {
 	DB *gorm.DB
 }
 
+// @Summary Create a new user
+// @Description Add a new user to the hospital.HospitalID is taken from the token.It will be ignored in the request body
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param user body models.UserBody true "User data"
+// @Success 200 {object} models.User
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /users [post]
+// @Security BearerAuth
 func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	if !utils.IsAdmin(c) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -30,8 +42,14 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+	if user.Role != "Admin" && user.Role != "User" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid Role",
+		})
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	user.HospitalID = int(HospitalID)
+	user.HospitalID = uint(HospitalID)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -48,6 +66,15 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 
 }
 
+// @Summary Get all users
+// @Description Retrieve a list of all users associated with the user's hospital
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.User
+// @Failure 500 {object} ErrorResponse
+// @Router /users [get]
+// @Security BearerAuth
 func (h *UserHandler) GetUsers(c *fiber.Ctx) error {
 	user := c.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
@@ -62,6 +89,16 @@ func (h *UserHandler) GetUsers(c *fiber.Ctx) error {
 	return c.JSON(users)
 }
 
+// @Summary Get user by ID
+// @Description Retrieve a single user by their ID
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} models.User
+// @Failure 404 {object} ErrorResponse
+// @Router /users/{id} [get]
+// @Security BearerAuth
 func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var targetUser models.User
@@ -72,6 +109,21 @@ func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 	}
 	return c.JSON(targetUser)
 }
+
+// @Summary Update a user
+// @Description Update an existing user's details
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Param user body models.UserBody true "User data"
+// @Success 200 {object} models.User
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /users/{id} [put]
+// @Security BearerAuth
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	if !utils.IsAdmin(c) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -116,7 +168,7 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 			"error": "User not found",
 		})
 	}
-	if err := h.DB.Delete(&targetUser).Error; err != nil {
+	if err := h.DB.Unscoped().Delete(&targetUser).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})

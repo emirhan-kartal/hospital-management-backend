@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"fmt"
+	_ "example/hello/docs"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -21,12 +21,31 @@ type RegisterData struct {
 	Hospital models.Hospital
 	User     models.User
 }
+type RegisterDataBody struct {
+	Hospital models.HospitalBody
+	User     models.UserBody
+}
+
 type LoginData struct {
 	Email    string `json:"email"`
 	Tel_no   string `json:"tel_no"`
 	Password string `json:"password"`
 }
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
 
+// @Summary Register a new user
+// @Description Register a new user and hospital,Ignore HospitalID in User
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param registerData body RegisterDataBody true "Register Data"
+// @Success 200 {object} RegisterData
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /register [post]
+// @Security BearerAuth
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var data RegisterData
 
@@ -41,19 +60,22 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-	data.User.Password = string(hashedPassword)
-	fmt.Println("User:" + string(hashedPassword))
 
+	if data.User.Role != "Admin" && data.User.Role != "User" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Role must be Admin or User",
+		})
+	}
 	if err := h.DB.Create(&data.Hospital).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 	data.User.HospitalID = data.Hospital.ID
+	data.User.Password = string(hashedPassword)
 
 	if err := h.DB.Create(&data.User).Error; err != nil {
 		if err := h.DB.Unscoped().Delete(&data.Hospital).Error; err != nil {
-			fmt.Println("Hospital Silinemedi")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": err.Error(),
 			})
@@ -63,8 +85,21 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		})
 	}
 	data.Hospital.User = append(data.Hospital.User, data.User)
-	return c.JSON(data)
+	return c.JSON(data.Hospital)
 }
+
+// @Summary Login a user
+// @Description Login a user and return a JWT token.You can login with email or tel_no
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param loginData body LoginData true "Login Data"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Router /login [post]
+// @Security BearerAuth
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var user LoginData
 	if err := c.BodyParser(&user); err != nil {

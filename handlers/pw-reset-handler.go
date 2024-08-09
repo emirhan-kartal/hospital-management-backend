@@ -3,7 +3,6 @@ package handlers
 import (
 	"example/hello/models"
 	"example/hello/utils"
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,6 +19,18 @@ type ResetPasswordInitiateData struct {
 	Tel_no string `json:"tel_no"`
 }
 
+// @Summary Initiate password reset
+// @Description Send a reset code to the user's phone number
+// @Tags password-reset
+// @Accept json
+// @Produce json
+// @Param phone body ResetPasswordInitiateData true "Phone number"
+// @Success 200 {string} string "Code sent to your phone number. Code(For Development):<code>"
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 409 {object} ErrorResponse
+// @Router /reset-password/initiate [post]
+// @Security BearerAuth
 func (h *PWHandler) ResetPasswordInitiate(c *fiber.Ctx) error {
 	var phone ResetPasswordInitiateData
 	if err := c.BodyParser(&phone); err != nil {
@@ -30,7 +41,6 @@ func (h *PWHandler) ResetPasswordInitiate(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusConflict)
 	}
 
-	fmt.Println(phone.Tel_no + " Reset PW")
 	var dbUser models.User
 	if err := h.DB.Where("tel_no = ?", phone.Tel_no).First(&dbUser).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -56,6 +66,18 @@ type ResetPasswordFinalizeCode struct {
 	Tel_no string `json:"tel_no"`
 }
 
+// @Summary Finalize password reset
+// @Description Validate the reset code and get a token to change the password
+// @Tags password-reset
+// @Accept json
+// @Produce json
+// @Param resetPassword body ResetPasswordFinalizeCode true "Reset code and phone number"
+// @Success 200 {string} string "Password reset successful. go to /change-password with this token:<token>"
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Router /reset-password/finalize [post]
+// @Security BearerAuth
 func (h *PWHandler) ResetPasswordFinalize(c *fiber.Ctx) error {
 
 	var resetPassword ResetPasswordFinalizeCode
@@ -87,6 +109,18 @@ type ResetPasswordData struct {
 	ValidateCode   string `json:"validate_code"`
 }
 
+// @Summary Reset password
+// @Description Change the user's password using the validation token
+// @Tags password-reset
+// @Accept json
+// @Produce json
+// @Param data body ResetPasswordData true "Password reset data"
+// @Success 200 {string} string "Password changed successfully"
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /reset-password [post]
+// @Security BearerAuth
 func (h *PWHandler) ResetPassword(c *fiber.Ctx) error {
 	var data ResetPasswordData
 	if err := c.BodyParser(&data); err != nil {
@@ -127,7 +161,6 @@ func (h *PWHandler) ResetPassword(c *fiber.Ctx) error {
 	}
 	dbUser.Password = newHashedPw
 	dbUser.TokenVersion++
-
 	if err := h.DB.Save(&dbUser).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),

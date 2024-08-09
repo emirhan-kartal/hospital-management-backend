@@ -1,0 +1,40 @@
+{
+    "hospital": {
+        "adressDetail": "string",
+        "city": "string",
+        "district": "string",
+        "email": "string",
+        "id": 0,
+        "name": "string",
+        "taxID": "string",
+        "telNo": "string",
+        "user": [
+            {
+                "email": "string",
+                "hospital": "string",
+                "hospitalID": 0,
+                "id": 0,
+                "name": "string",
+                "password": "string",
+                "role": "string",
+                "surname": "string",
+                "tcNo": "string",
+                "telNo": "string",
+                "tokenVersion": 0
+            }
+        ]
+    },
+    "user": {
+        "email": "string",
+        "hospital": "string",
+        "hospitalID": 0,
+        "id": 0,
+        "name": "string",
+        "password": "string",
+        "role": "string",
+        "surname": "string",
+        "tcNo": "string",
+        "telNo": "string",
+        "tokenVersion": 0
+    }
+}

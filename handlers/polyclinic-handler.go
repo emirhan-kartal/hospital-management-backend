@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"encoding/json"
 	"example/hello/models"
 	"example/hello/utils"
-	"fmt"
+	
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -17,42 +16,20 @@ type PolyclinicHandler struct {
 	Redis *redis.Client
 }
 
-func (h *PolyclinicHandler) GetPolyclinicsNotInHospital(c *fiber.Ctx) error { //this is gonna be listed in a select / option tag in the frontend
-
-	claims := c.Locals("user").(*jwt.Token).Claims.(jwt.MapClaims)
-	hospitalID := claims["hospital_id"].(float64)
-
-	var polyclinics []models.Polyclinic
-	h.DB.Where("hospital_id = ?", hospitalID).Find(&polyclinics)
-
-	var polyclinicsRedis []models.RedisPolyclinic
-
-	polyclinicsString := h.Redis.Get(c.Context(), "polyclinics").Val()
-	err := json.Unmarshal([]byte(polyclinicsString), &polyclinicsRedis)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-	fmt.Println(polyclinicsRedis)
-	fmt.Println(h.Redis.Get(c.Context(), "polyclinics").Val())
-	var polyclinicsNotInHospital []string
-	for i, polyclinic := range polyclinicsRedis {
-		if len(polyclinics) == 0 {
-			return c.JSON(polyclinicsRedis)
-		}
-		if polyclinics[i+1].Name != polyclinic.Name {
-			polyclinicsNotInHospital = append(polyclinicsNotInHospital, polyclinic.Name)
-		}
-	}
-	return c.JSON(polyclinicsNotInHospital)
-}
-
 type PolyclinicData struct {
 	models.Polyclinic
 	JobCounts []map[string]int
 }
 
+// @Summary Get polyclinics of the hospital
+// @Description Retrieve a list of polyclinics associated with the user's hospital
+// @Tags polyclinic
+// @Accept json
+// @Produce json
+// @Success 200 {array} PolyclinicData
+// @Failure 500 {object} ErrorResponse
+// @Router /polyclinics [get]
+// @Security BearerAuth
 func (h *PolyclinicHandler) GetPolyclinicsOfHospital(c *fiber.Ctx) error {
 	claims := c.Locals("user").(*jwt.Token).Claims.(jwt.MapClaims)
 	hospitalID := claims["hospital_id"].(float64)
@@ -72,8 +49,6 @@ func (h *PolyclinicHandler) GetPolyclinicsOfHospital(c *fiber.Ctx) error {
 	}
 	polyclinicData := make([]PolyclinicData, len(polyclinics))
 
-	fmt.Println(polyclinicData)
-
 	for i := range polyclinics {
 		jobTypeData := utils.BasicInfoHospital(&polyclinics[i])
 		polyclinicData[i].JobCounts = append(polyclinicData[i].JobCounts, jobTypeData)
@@ -82,6 +57,19 @@ func (h *PolyclinicHandler) GetPolyclinicsOfHospital(c *fiber.Ctx) error {
 
 	return c.JSON(polyclinicData)
 }
+
+// @Summary Add a polyclinic to the hospital
+// @Description Add a new polyclinic to the user's hospital
+// @Tags polyclinic
+// @Accept json
+// @Produce json
+// @Param body body models.PolyclinicBody true "Polyclinic Data"
+// @Success 200 {object} models.Polyclinic
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /polyclinics [post]
+// @Security BearerAuth
 func (h *PolyclinicHandler) AddPolyclinicToHospital(c *fiber.Ctx) error {
 	if !utils.IsAdmin(c) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -89,13 +77,7 @@ func (h *PolyclinicHandler) AddPolyclinicToHospital(c *fiber.Ctx) error {
 		})
 	}
 
-	type Body struct {
-		PolyclinicName string `json:"polyclinic_name"`
-		City           string `json:"city"`
-		District       string `json:"district"`
-	}
-
-	var body Body
+	var body models.PolyclinicBody
 	claims := c.Locals("user").(*jwt.Token).Claims.(jwt.MapClaims)
 	hospitalID := claims["hospital_id"].(float64)
 
@@ -107,14 +89,14 @@ func (h *PolyclinicHandler) AddPolyclinicToHospital(c *fiber.Ctx) error {
 		})
 	}
 
-	if !utils.RedisDataContains("polyclinics", body.PolyclinicName, c.Context(), h.Redis) { // not sure if this should be implemented
+	if !utils.RedisDataContains("polyclinics", body.Name, c.Context(), h.Redis) { // not sure if this should be implemented
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid Polyclinic",
 		})
 	}
 
 	polyclinic.HospitalID = int(hospitalID)
-	polyclinic.Name = body.PolyclinicName
+	polyclinic.Name = body.Name
 	polyclinic.City = body.City
 	polyclinic.District = body.District
 
@@ -126,6 +108,18 @@ func (h *PolyclinicHandler) AddPolyclinicToHospital(c *fiber.Ctx) error {
 	return c.JSON(polyclinic)
 }
 
+// @Summary Delete a polyclinic
+// @Description Delete an existing polyclinic by ID
+// @Tags polyclinic
+// @Accept json
+// @Produce json
+// @Param id path int true "Polyclinic ID"
+// @Success 200 {object} models.Polyclinic
+// @Failure 401 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /polyclinics/{id} [delete]
+// @Security BearerAuth
 func (h *PolyclinicHandler) DeletePolyclinic(c *fiber.Ctx) error {
 	if !utils.IsAdmin(c) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
